@@ -1,17 +1,22 @@
 extends CharacterBody3D
 
-@onready var label: Label = $CanvasLayer/AdminPanel/Label
 @onready var camera: Camera3D = $Camera3D
+@onready var shoot_raycast: RayCast3D = $Camera3D/RayCast3D
+
+#UI
+@onready var label: Label = $CanvasLayer/AdminPanel/Label
+@onready var spell_choice_panel: Panel = $CanvasLayer/SpellChoicePanel
 
 const SPEED = 1
 const SPEED_FALLOFF: float = .98
 const MOUSE_SENSITIVITY = 0.25
 const ROLL_SENTITIVITY = 0.15
 const GRAVITY = 9.8
-
+var menu_open = false
 var can_shoot = true
 var is_dead = false
 
+# BUILTIN FUNCTIONS
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	
@@ -19,12 +24,12 @@ func _input(event: InputEvent) -> void:
 	if is_dead:
 		return
 
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseMotion && !menu_open:
 		camera.rotation_degrees.x -= event.relative.y * MOUSE_SENSITIVITY
 		rotation_degrees.y -= event.relative.x * MOUSE_SENSITIVITY		
 		camera.rotation_degrees.z -= event.relative.x * ROLL_SENTITIVITY
-	
-func _process(delta: float) -> void:
+		
+func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("exit"):
 		get_tree().quit()
 	if Input.is_action_just_pressed("restart"):
@@ -38,10 +43,19 @@ func _process(delta: float) -> void:
 	camera.rotation_degrees.z = lerp(camera.rotation_degrees.z, 0.0, 0.05)
 		
 	if Input.is_action_just_pressed("shoot"):
-		shoot()
+		shoot(1)	
+		
+	if Input.is_action_just_pressed("alt_shoot"):
+		shoot(2)
+		
+	if Input.is_action_just_pressed("open_menu"):
+		open_menu()
+		
+	if Input.is_action_just_released("open_menu"):
+		close_menu()
 		
 	#Display Data
-	label.text = "Position %v" % position
+	label.text = "%v" % position
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -68,8 +82,29 @@ func _physics_process(delta: float) -> void:
 	#bleedoff
 	velocity *= 0.98
 
+# MY FUNCTIONS
 func restart() -> void:
 	get_tree().reload_current_scene()
 	
-func shoot() -> void:
-	pass
+func shoot(button: int) -> void:
+	if !is_dead && !menu_open && can_shoot:
+		if shoot_raycast.is_colliding():
+			match button:
+				1:
+					print("One")
+					if shoot_raycast.get_collider().has_method("take_damage"):
+						print("Hit enemy")
+				2:
+					print("Two")
+				
+# MY UI FUNCTIONS
+func open_menu():
+	menu_open = true
+	Input.mouse_mode = Input.MOUSE_MODE_CONFINED
+	Input.warp_mouse(Vector2(60, 480)) 
+	spell_choice_panel.scale = Vector2.ONE
+	
+func close_menu():
+	menu_open = false
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	spell_choice_panel.scale = Vector2.ZERO
