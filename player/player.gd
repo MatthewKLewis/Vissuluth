@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-@onready var label: Label = $CanvasLayer/Panel/Label
+@onready var label: Label = $CanvasLayer/AdminPanel/Label
 @onready var camera: Camera3D = $Camera3D
 
 const SPEED = 1
@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 		shoot()
 		
 	#Display Data
-	label.text = "Movement %v" % velocity;
+	label.text = "Position %v" % position
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -55,10 +55,15 @@ func _physics_process(delta: float) -> void:
 	velocity.y += -GRAVITY * delta
 	velocity.x += direction.x
 	velocity.z += direction.z
+	
+	if (Input.is_action_pressed("stop")):
+		velocity.x *= .9
+		velocity.z *= .9
+	
 	if (move_and_slide()):
-		pass
 		#print("Bonk")
 		#velocity *= 0.75 #slide past penalty?
+		pass
 	
 	#bleedoff
 	velocity *= 0.98

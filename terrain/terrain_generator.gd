@@ -39,7 +39,7 @@ func generate_terrain():
 			uv.x = inverse_lerp(0, 1, x)
 			uv.y = inverse_lerp(0, 1, z)
 			surfTool.set_uv(uv)			
-			surfTool.set_color(Color(0,1,0,1))							
+			surfTool.set_color(Color(0.2,0.3,0.2,1))							
 			surfTool.add_vertex(Vector3(x * TILE_SIZE, y, z * TILE_SIZE))
 		
 	#Fill the Triangle Index Array
